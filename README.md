@@ -1,222 +1,91 @@
-# Smart-Budget
 
 
-> A futuristic AI-powered budget tracking web app with wishlist fund management, analytics, and secure local storage.
+````markdown
+# 💸 Smart-Budget AI
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Security-XSS_Protected-green?style=for-the-badge&logo=shield" alt="Security Protected">
+  <img src="https://img.shields.io/badge/Privacy-Local_Storage-blueviolet?style=for-the-badge&logo=lock" alt="Privacy First">
+  <img src="https://img.shields.io/badge/Built_by-Naman_Kumar_Sonker-orange?style=for-the-badge&logo=github" alt="Author">
+</p>
+
+> **"Financial discipline meets hacker-grade privacy."** > A futuristic, AI-inspired budget tracking web app featuring wishlist fund management, real-time analytics, and secure client-side storage.
 
 ---
 
 ## 🚀 Features
 
-- 💰 **Daily Budget Calculation**
-- Smart per-day spending limit based on remaining balance & time
-
-- 📊 **Analytics Dashboard**
-- Spending trends (Chart.js)
-- Category-wise expense breakdown
-
-- 🧾 **Expense Tracking**
-- Add, delete, and categorize expenses
-- Real-time updates
-
-- 🎯 **Wishlist Fund System**
-- Save money for desired items
-- Buy directly from accumulated fund
-
-- 🔄 **Cycle Management**
-- Reset budget cycle
-- Carry forward savings into wishlist fund
-
-- 📦 **Backup & Restore**
-- Export full data as JSON
-- Restore anytime
-
-- 📤 **CSV Export**
-- Export all or date-range data
-
-- 🔐 **Security Focused**
-- XSS protection using input sanitization (`escapeHtml()`)
+* 💰 **Dynamic Daily Limit** – Smart per-day spending limits that adjust in real-time based on your remaining balance and time.
+* 📊 **Analytics Dashboard** – High-fidelity spending trends via **Chart.js** and category-wise breakdowns.
+* 🎯 **Wishlist Fund System** – Specialized logic to save for goals using accumulated savings and "daily tax" accruals.
+* 🔄 **Cycle Management** – Seamlessly reset cycles with automated carry-forward logic into your wishlist.
+* 📦 **Data Sovereignty** – Export full data as JSON for backups or CSV for external auditing.
+* 🔐 **Security Hardened** – Native XSS protection through strict input sanitization using `escapeHtml()`.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML, Tailwind CSS
-- **Charts:** Chart.js
-- **Icons:** Phosphor Icons
-- **Storage:** LocalStorage (No backend required)
-
----
-
-## 📂 Project Structure
-.
-├── index.html # Main application file
-
----
-
-## ⚙️ How It Works
-
-- The app initializes with user inputs like:
-- Budget
-- Duration
-- Fixed costs
-- Optional daily tax
-
-- It calculates:
-- Remaining balance
-- Daily spending limit
-- Wishlist fund accumulation
-
-- All data is stored locally using browser storage.
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | HTML5 & Tailwind CSS (Glassmorphism UI) |
+| **Charts** | Chart.js |
+| **Icons** | Phosphor Icons |
+| **Storage** | LocalStorage (100% Client-Side / Offline First) |
 
 ---
 
 ## 🧠 Core Logic
 
-- **Strict Remaining Balance:**
-Remaining = Budget - Fixed Costs - (Daily Tax × Days) - Total Spent
+The application maintains financial integrity using the following mathematical models:
 
+**Remaining Balance:** $$Remaining = Budget - FixedCosts - (DailyTax \times Days) - TotalSpent$$
 
-- **Daily Limit:**
-Daily Limit = Remaining / Remaining Days
+**Daily Limit:** $$DailyLimit = \frac{Remaining}{RemainingDays}$$
 
-
-- **Wishlist Fund:**
-Fund = Previous Savings + Accrued Tax
-
+**Wishlist Fund:** $$Fund = PreviousSavings + AccruedTax$$
 
 ---
 
-## 🔥 Highlights
+## 📂 Project Structure
 
-- No backend required ⚡
-- Fully offline capable
-- Clean UI with glassmorphism design
-- Secure input handling
-- Real-time financial insights
+```bash
+.
+├── index.html          # Core Application (Logic, Styles, & UI)
+└── README.md           # Documentation
+````
 
----
+-----
 
-## 📸 Preview
+## ⚙️ How It Works
 
-> UI includes:
-- Dashboard
-- Expense tracker
-- Charts
-- Wishlist system
-(See `index.html` for full implementation) :contentReference[oaicite:0]{index=0}
+1.  **Initialize:** Input your total budget, duration, and fixed costs.
+2.  **Calculate:** The engine determines your "Safe-to-Spend" daily limit.
+3.  **Track:** Add expenses in real-time; the UI updates instantly without page refreshes.
+4.  **Secure:** All data stays in your browser. No server, no tracking, no leaks.
 
----
+-----
 
 ## 🧑‍💻 Author
 
-**Naman Kumar Sonker**
+**Naman Kumar Sonker** *Cyber Security & Ethical Hacking | Sharda University*
 
-- Instagram: https://www.instagram.com/namanmic
-- LinkedIn: https://www.linkedin.com/in/namanmic
-- GitHub: https://github.com/nksdev
+[](https://www.instagram.com/namanmic)
+[](https://www.linkedin.com/in/namanmic)
+[](https://github.com/nksdev)
 
----
+-----
 
-## 📜 License
+## 📜 License & Support
 
-This project is open-source and free to use.
+This project is open-source. If this tool helps you optimize your 💸, give it a **Star**\!
 
----
+> [\!WARNING]
+> **Data Persistence:** This app uses `LocalStorage`. Clearing your browser cache will delete your data. Always use the **Backup** feature to keep your data safe.
 
-## ⭐ Support
+-----
 
-If you like this project:
+\<p align="center"\>Built with 💙 + ☕ + hacker mindset\</p\>
 
-- ⭐ Star the repo
-- 🍴 Fork it
-- 🧠 Build your own version
-
----
-
-## ⚠️ Note
-
-This app uses **LocalStorage**, so clearing browser data will erase everything unless backed up.
-
----
-
-> Built with 💙 + ☕ + hacker mindset
-If you want next level flex 😏
-I can also add:
-badges (GitHub stats, stars, etc.)
-live demo hosting (GitHub Pages)
-hacker-style animated README
-Just say the word 💻🔥 [ write in .md github readme.md ]
-This looks like a solid project for a cybersecurity student—local storage for privacy, XSS protection, and a clean UI. Since you asked for the "next level flex," I’ve added dynamic GitHub badges, a cleaner structure, and that "hacker-style" aesthetic you mentioned.
-
-Here is your upgraded README.md. Simply copy the raw text below:
-
-💸 Smart Budget AI
-"Financial discipline meets hacker-grade privacy."
-A futuristic, AI-powered budget tracking web app with wishlist fund management, real-time analytics, and secure local storage.
-
-🚀 Features
-💰 Daily Budget Calculation – Dynamic per-day limits based on remaining balance and time.
-
-📊 Analytics Dashboard – Visual spending trends via Chart.js and category breakdowns.
-
-🧾 Expense Tracking – Real-time CRUD operations for your daily spending.
-
-🎯 Wishlist Fund System – Specialized logic to save for goals using accumulated savings.
-
-🔄 Cycle Management – Easy resets with automated carry-forward logic.
-
-📦 Data Sovereignty – Full JSON backup/restore and CSV export functionality.
-
-🔐 Security Focused – Hardened against XSS via strict input sanitization (
-
-escapeHtml()
-).
-
-🛠️ Tech Stack
-Layer	Technology
-Frontend	HTML5, Tailwind CSS (Glassmorphism UI)
-Charts	Chart.js
-Icons	Phosphor Icons
-Storage	LocalStorage (100% Client-Side / Privacy First)
-🧠 Core Logic
-The application calculates your financial health using the following formulas:
-
-Remaining Balance:
-
-Remaining=Budget−FixedCosts−(DailyTax×Days)−TotalSpent
-Daily Limit:
-
-DailyLimit= 
-RemainingDays
-Remaining
-​	
- 
-Wishlist Fund:
-
-Fund=PreviousSavings+AccruedTax
-📂 Project Structure
-Bash
-.
-├── index.html          # Core Application Logic & UI
-└── README.md           # Documentation
-⚙️ Setup & Usage
-Clone the Repo: git clone https://github.com/nksdev/smart-budget-ai.git
-
-Launch: Open index.html in any modern browser.
-
-Initialize: Enter your total budget, duration, and fixed costs.
-
-Track: Add expenses and watch the daily limit adjust in real-time.
-
-🧑‍💻 Author
-Naman Kumar Sonker
-Ethical Hacking & Cyber Security @ Sharda University
-
-📜 License
-This project is licensed under the MIT License - feel free to fork, modify, and build your own version!
-
-⭐ Support
-If this tool helps you save some 💸, consider giving it a Star!
-
-Built with 💙 + ☕ + hacker mindset.
-Note: Data is stored in LocalStorage. Clear your cache, lose your cash (data). Always export backups!
+```
+```
