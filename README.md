@@ -1,6 +1,6 @@
 
 
-````markdown
+
 # 💸 Smart-Budget AI
 
 <p align="center">
@@ -68,7 +68,7 @@ The application maintains financial integrity using the following mathematical m
 
 ## 🧑‍💻 Author
 
-**Naman Kumar Sonker** *Cyber Security & Ethical Hacking | Sharda University*
+**Naman Kumar Sonker** *
 
 [](https://www.instagram.com/namanmic)
 [](https://www.linkedin.com/in/namanmic)
@@ -83,9 +83,8 @@ This project is open-source. If this tool helps you optimize your 💸, give it 
 > [\!WARNING]
 > **Data Persistence:** This app uses `LocalStorage`. Clearing your browser cache will delete your data. Always use the **Backup** feature to keep your data safe.
 
------
 
-\<p align="center"\>Built with 💙 + ☕ + hacker mindset\</p\>
 
-```
-```
+
+
+
