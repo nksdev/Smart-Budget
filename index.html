@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Smart Budget AI: Ultimate</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        glass: "rgba(15, 23, 42, 0.95)",
+                        glassBorder: "rgba(255, 255, 255, 0.08)",
+                    },
+                    animation: { 'fade-in': 'fadeIn 0.4s ease-out' },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #020617;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glassBorder);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+        }
+        /* Hide scrollbars but allow functionality */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        
+        input, select { color-scheme: dark; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .chart-container { position: relative; height: 250px; width: 100%; }
+    </style>
+</head>
+
+<body class="min-h-screen font-sans selection:bg-indigo-500 selection:text-white flex flex-col">
+
+<div class="max-w-7xl mx-auto p-4 md:p-8 space-y-8 flex-grow w-full relative">
+
+    <header class="flex flex-col md:flex-row justify-between items-center gap-4 animate-fade-in">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <i class="ph-bold ph-wallet text-2xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Smart Budget <span class="text-indigo-400">AI</span></h1>
+                <p id="welcomeMsg" class="text-xs text-slate-400 font-medium uppercase tracking-wider">Loading...</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-2">
+            <button onclick="toggleModal('exportModal')" class="px-4 py-2 rounded-lg bg-emerald-900/30 border border-emerald-700/50 text-xs text-emerald-400 hover:bg-emerald-900/50 transition-all flex items-center gap-2">
+                <i class="ph-bold ph-file-csv"></i> Export
+            </button>
+            <button onclick="toggleModal('settingsModal')" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-all flex items-center gap-2">
+                <i class="ph-bold ph-gear"></i> Data & Backup
+            </button>
+            <button onclick="toggleModal('cycleModal')" class="px-4 py-2 rounded-lg bg-indigo-900/30 border border-indigo-700/50 text-xs text-indigo-400 hover:bg-indigo-900/50 transition-all flex items-center gap-2">
+                <i class="ph-bold ph-arrows-clockwise"></i> New Cycle
+            </button>
+        </div>
+    </header>
+
+    <div id="setupPanel" class="max-w-xl mx-auto glass-panel rounded-3xl p-8 space-y-6 mt-12 hidden animate-fade-in">
+        <div class="text-center">
+            <h2 class="text-2xl font-bold text-white">Initialize System</h2>
+            <p class="text-sm text-slate-400">Let's set up your budget parameters.</p>
+        </div>
+        <div class="space-y-4">
+            <input id="userName" type="text" placeholder="Your Name" maxlength="20" class="w-full p-4 rounded-xl bg-slate-900/60 border border-slate-700 text-white focus:border-indigo-500 outline-none">
+            <div class="grid grid-cols-2 gap-4">
+                <input id="totalBudget" type="number" placeholder="Total Budget (₹)" class="w-full p-4 rounded-xl bg-slate-900/60 border border-slate-700 text-white focus:border-indigo-500 outline-none">
+                <input id="totalDays" type="number" placeholder="Duration (Days)" class="w-full p-4 rounded-xl bg-slate-900/60 border border-slate-700 text-white focus:border-indigo-500 outline-none">
+            </div>
+            <input id="fixedCosts" type="number" placeholder="Fixed Costs (Rent, EMI - Deducted immediately)" class="w-full p-4 rounded-xl bg-slate-900/60 border border-slate-700 text-white focus:border-indigo-500 outline-none">
+            <input id="dailyTax" type="number" placeholder="Daily Wishlist Tax (Optional ₹)" class="w-full p-4 rounded-xl bg-slate-900/60 border border-slate-700 text-white focus:border-indigo-500 outline-none">
+        </div>
+        <button onclick="initializeSystem()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-transform hover:scale-[1.02]">Start Tracking</button>
+    </div>
+
+    <main id="app" class="hidden space-y-8 animate-fade-in pb-10">
+
+        <div class="flex justify-center gap-4 bg-slate-800/60 p-1.5 rounded-full w-fit mx-auto border border-slate-700/50">
+            <button onclick="switchTab('dashboard')" id="tabDashboard" class="px-6 py-2 rounded-full text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md">Dashboard</button>
+            <button onclick="switchTab('wishlist')" id="tabWishlist" class="px-6 py-2 rounded-full text-sm font-semibold transition-all text-slate-400 hover:text-white">Wishlist Fund</button>
+        </div>
+
+        <div id="dashboardView" class="space-y-6">
+            
+            <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-indigo-500">
+                    <p class="text-[10px] text-indigo-300 uppercase font-bold tracking-widest">Daily Limit</p>
+                    <b id="dailyBudgetDisplay" class="text-2xl text-white">₹0</b>
+                    <p class="text-[10px] text-slate-500">Safe to spend</p>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-rose-500">
+                    <p class="text-[10px] text-rose-300 uppercase font-bold tracking-widest">Spent</p>
+                    <b id="totalSpentDisplay" class="text-2xl text-rose-400">₹0</b>
+                    <p class="text-[10px] text-slate-500">This Cycle</p>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-emerald-500">
+                    <p class="text-[10px] text-emerald-300 uppercase font-bold tracking-widest">Strict Balance</p>
+                    <b id="savingsDisplay" class="text-2xl text-emerald-400">₹0</b>
+                    <p id="daysRemainingDisplay" class="text-[10px] text-slate-500">Days Left</p>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl border-l-4 border-purple-500">
+                    <p class="text-[10px] text-purple-300 uppercase font-bold tracking-widest">Wish Fund</p>
+                    <b id="wishFundDisplay" class="text-2xl text-purple-400">₹0</b>
+                    <p class="text-[10px] text-slate-500">Banked + Accrued</p>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 space-y-6">
+                    <section class="glass-panel rounded-2xl p-6 space-y-4">
+                        <div id="aiMessage" class="text-xs text-center text-indigo-300 bg-indigo-900/30 p-2 rounded border border-indigo-500/20">
+                            System Ready.
+                        </div>
+                        <div class="space-y-3">
+                            <input id="expenseAmount" type="number" placeholder="Amount (₹)" class="w-full p-3.5 rounded-xl bg-slate-900/60 border border-slate-700 text-white text-lg font-bold focus:border-indigo-500 outline-none">
+                            <input id="expenseNote" type="text" maxlength="30" placeholder="Note (e.g. Lunch)" class="w-full p-3.5 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white focus:border-indigo-500 outline-none">
+                            <div class="flex gap-2">
+                                <select id="expenseCategory" class="flex-1 p-3.5 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white outline-none">
+                                    <option value="Food">Food</option>
+                                    <option value="Travel">Travel</option>
+                                    <option value="Bills">Bills</option>
+                                    <option value="Shopping">Shopping</option>
+                                    <option value="Misc">Misc</option>
+                                </select>
+                                <button onclick="addExpense()" class="px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg active:scale-95 transition-transform">Add</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="glass-panel rounded-2xl p-6 h-[400px] flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">History</h3>
+                            <button onclick="renderLog()" class="text-xs text-indigo-400 hover:text-white"><i class="ph-bold ph-arrow-counter-clockwise"></i> Refresh</button>
+                        </div>
+                        <div id="log" class="overflow-y-auto space-y-2 pr-2 flex-1 scrollbar-thin">
+                            </div>
+                    </section>
+                </div>
+
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 h-fit">
+                    <section class="glass-panel rounded-2xl p-6">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Spending Trend</h3>
+                        <div class="chart-container">
+                            <canvas id="dailyChart"></canvas>
+                        </div>
+                    </section>
+                    <section class="glass-panel rounded-2xl p-6">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Categories</h3>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <div id="wishlistView" class="hidden space-y-6">
+            <div class="glass-panel p-8 rounded-2xl text-center border border-dashed border-purple-500/30">
+                <i class="ph-duotone ph-piggy-bank text-5xl text-purple-400 mb-3 animate-pulse"></i>
+                <h2 class="text-2xl font-bold text-white">Available Fund: <span id="fundBigDisplay" class="text-purple-400">₹0</span></h2>
+                <p class="text-slate-400 text-sm mt-1">Accumulated from Cycle Savings & Daily Tax</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 rounded-2xl space-y-4 h-fit">
+                    <h3 class="font-bold text-purple-400 uppercase text-xs tracking-widest">Add Wish</h3>
+                    <input id="wishName" maxlength="30" placeholder="Item Name" class="w-full p-3 rounded-lg bg-slate-900/60 border border-slate-700 text-white outline-none">
+                    <input id="wishPrice" type="number" placeholder="Cost (₹)" class="w-full p-3 rounded-lg bg-slate-900/60 border border-slate-700 text-white outline-none">
+                    <button onclick="addToWishlist()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold shadow-lg">Lock Item</button>
+                </div>
+                <div id="wishlistGrid" class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-12 pt-8 border-t border-slate-800/60 text-center animate-fade-in pb-4">
+        <p class="text-sm text-slate-400 mb-4">Created by <span class="text-indigo-400 font-semibold">Naman Kumar Sonker</span></p>
+        <div class="flex justify-center gap-6">
+            <a href="https://www.instagram.com/namanmic" target="_blank" class="text-slate-500 hover:text-pink-500 transition-colors flex items-center gap-2 group">
+                <i class="ph-bold ph-instagram-logo text-2xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-xs font-mono group-hover:underline">@namanmic</span>
+            </a>
+            <a href="https://github.com/nksdev" target="_blank" class="text-slate-500 hover:text-white transition-colors flex items-center gap-2 group">
+                <i class="ph-bold ph-github-logo text-2xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-xs font-mono group-hover:underline">nksdev</span>
+            </a>
+        </div>
+        <p class="text-[10px] text-slate-600 mt-4">Secure Edition v10.0 • Reactified Logic</p>
+    </footer>
+
+</div>
+
+<div id="exportModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-6 rounded-2xl max-w-sm w-full space-y-4">
+        <h3 class="text-xl font-bold text-white">Export Analytics</h3>
+        <div class="space-y-2">
+            <label class="text-xs text-slate-400 uppercase">Export Type</label>
+            <div class="flex gap-2">
+                <button onclick="exportData('all')" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-sm">All Time</button>
+            </div>
+        </div>
+        <div class="space-y-2 pt-2 border-t border-slate-700/50">
+            <label class="text-xs text-slate-400 uppercase">Or Select Range</label>
+            <input type="date" id="exportStart" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white text-xs">
+            <input type="date" id="exportEnd" class="w-full p-2 bg-slate-900 rounded border border-slate-700 text-white text-xs">
+            <button onclick="exportData('range')" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded text-sm mt-2">Export Selection</button>
+        </div>
+        <button onclick="toggleModal('exportModal')" class="w-full py-2 text-slate-400 hover:text-white text-xs">Close</button>
+    </div>
+</div>
+
+<div id="settingsModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-6 rounded-2xl max-w-sm w-full space-y-6">
+        <h3 class="text-xl font-bold text-white">Data & Backup</h3>
+        
+        <div class="space-y-2">
+            <p class="text-xs text-slate-400">Backup your entire budget state to a JSON file.</p>
+            <button onclick="backupData()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center justify-center gap-2">
+                <i class="ph-bold ph-download-simple"></i> Download Backup
+            </button>
+        </div>
+
+        <div class="space-y-2 pt-4 border-t border-slate-700/50">
+            <p class="text-xs text-slate-400">Restore from a backup file.</p>
+            <label class="w-full py-3 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-slate-300 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors">
+                <i class="ph-bold ph-upload-simple"></i> Restore Backup
+                <input type="file" onchange="restoreData(this)" class="hidden" accept=".json">
+            </label>
+        </div>
+        
+        <div class="pt-4 border-t border-slate-700/50">
+             <button onclick="hardReset()" class="w-full py-2 text-rose-500 hover:text-rose-400 text-xs border border-rose-900/30 bg-rose-900/10 rounded">Factory Reset App</button>
+        </div>
+        <button onclick="toggleModal('settingsModal')" class="w-full py-2 text-slate-400 hover:text-white text-xs">Close</button>
+    </div>
+</div>
+
+<div id="cycleModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-panel p-6 rounded-2xl max-w-sm w-full space-y-4">
+        <h3 class="text-xl font-bold text-white">End Current Cycle?</h3>
+        <p class="text-sm text-slate-300">
+            This will archive current expenses, add remaining savings to your Wishlist Fund, and reset for a new period.
+        </p>
+        <div class="bg-slate-900/50 p-3 rounded border border-slate-700">
+            <div class="flex justify-between text-sm mb-1">
+                <span class="text-slate-400">Current Savings:</span>
+                <span class="text-emerald-400" id="cycleSavingsPreview">₹0</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span class="text-slate-400">Action:</span>
+                <span class="text-purple-400">Move to Fund</span>
+            </div>
+        </div>
+        <button onclick="endCycle()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold">Confirm & Restart</button>
+        <button onclick="toggleModal('cycleModal')" class="w-full py-2 text-slate-400 hover:text-white text-xs">Cancel</button>
+    </div>
+</div>
+
+<script>
+/* ==================== SECURITY & UTILS ==================== */
+const escapeHtml = (unsafe) => {
+    if (typeof unsafe !== 'string') return unsafe;
+    return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+/* ==================== STATE MANAGEMENT ==================== */
+let state = {
+    userName: "User",
+    currentCycle: {
+        budget: 0, days: 30, fixed: 0, dailyTax: 0, 
+        startDate: new Date().toISOString(), expenses: []
+    },
+    history: [],
+    wishlist: [],
+    wishlistFund: 0
+};
+
+// Auto-Load on startup
+(function() {
+    const s = localStorage.getItem('budgetAi_v10');
+    if(s) {
+        try { state = JSON.parse(s); initUI(); } 
+        catch(e) { console.error("Data Corrupt"); }
+    } else {
+        document.getElementById('setupPanel').classList.remove('hidden');
+    }
+})();
+
+function save() { localStorage.setItem('budgetAi_v10', JSON.stringify(state)); }
+
+/* ==================== INITIALIZATION ==================== */
+function initializeSystem() {
+    const name = escapeHtml(document.getElementById('userName').value.trim()) || "User";
+    const budget = Number(document.getElementById('totalBudget').value);
+    const days = Number(document.getElementById('totalDays').value);
+    const fixed = Number(document.getElementById('fixedCosts').value) || 0;
+    const tax = Number(document.getElementById('dailyTax').value) || 0;
+
+    if (!budget || !days || budget < 0) return alert("Please enter valid positive numbers for Budget and Days.");
+
+    state = {
+        userName: name,
+        currentCycle: {
+            budget, days, fixed, dailyTax: tax,
+            startDate: new Date().toISOString(),
+            expenses: []
+        },
+        history: [],
+        wishlist: [],
+        wishlistFund: 0
+    };
+    save();
+    initUI();
+}
+
+function initUI() {
+    document.getElementById('setupPanel').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('welcomeMsg').textContent = `Operator: ${state.userName}`;
+    render();
+}
+
+/* ==================== CORE RENDER LOOP ==================== */
+function render() {
+    const cycle = state.currentCycle;
+    
+    // Calculations
+    const spent = cycle.expenses.reduce((acc, curr) => acc + curr.amount, 0);
+    const start = new Date(cycle.startDate);
+    const now = new Date();
+    const daysPassed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    const remainingDays = Math.max(1, cycle.days - daysPassed);
+    
+    // Financials
+    const totalTaxDue = cycle.dailyTax * cycle.days; 
+    const accruedTax = Math.min(daysPassed, cycle.days) * cycle.dailyTax;
+    
+    const disposable = cycle.budget - cycle.fixed;
+    // Strict Remaining: Budget - Fixed - TaxReserved - Spent
+    const realRemaining = disposable - totalTaxDue - spent; 
+    
+    let dailyCap = 0;
+    if (realRemaining > 0) dailyCap = Math.floor(realRemaining / remainingDays);
+    
+    const totalFund = state.wishlistFund + accruedTax;
+
+    // UI Updates
+    document.getElementById('dailyBudgetDisplay').textContent = `₹${dailyCap.toLocaleString()}`;
+    document.getElementById('totalSpentDisplay').textContent = `₹${spent.toLocaleString()}`;
+    
+    const saveEl = document.getElementById('savingsDisplay');
+    saveEl.textContent = `₹${realRemaining.toLocaleString()}`;
+    saveEl.className = realRemaining < 0 ? "text-2xl text-rose-500 font-bold" : "text-2xl text-emerald-400";
+    
+    document.getElementById('daysRemainingDisplay').textContent = `${remainingDays} Days Remaining`;
+    document.getElementById('wishFundDisplay').textContent = `₹${totalFund.toLocaleString()}`;
+    document.getElementById('fundBigDisplay').textContent = `₹${totalFund.toLocaleString()}`;
+    
+    // Savings Preview for Modal
+    const potentialSavings = Math.max(0, realRemaining) + totalTaxDue; // Tax is moved to fund on close
+    document.getElementById('cycleSavingsPreview').textContent = `₹${potentialSavings.toLocaleString()}`;
+
+    // Conditional Rendering
+    renderLog();
+    renderWishlist(totalFund);
+    
+    if (!document.getElementById('dashboardView').classList.contains('hidden')) {
+        renderCharts();
+    }
+}
+
+/* ==================== EXPENSE & WISHLIST LOGIC ==================== */
+function addExpense() {
+    const amt = Number(document.getElementById('expenseAmount').value);
+    const note = escapeHtml(document.getElementById('expenseNote').value) || "Expense";
+    const cat = escapeHtml(document.getElementById('expenseCategory').value);
+
+    if (!amt || amt <= 0) return alert("Enter valid amount");
+
+    state.currentCycle.expenses.push({
+        id: Date.now(),
+        amount: amt,
+        note: note,
+        category: cat,
+        date: new Date().toISOString()
+    });
+
+    document.getElementById('expenseAmount').value = "";
+    document.getElementById('expenseNote').value = "";
+    save(); render();
+}
+
+function addToWishlist() {
+    const name = escapeHtml(document.getElementById('wishName').value);
+    const price = Number(document.getElementById('wishPrice').value);
+    if (!name || !price) return;
+
+    state.wishlist.push({ id: Date.now(), name, price });
+    document.getElementById('wishName').value = "";
+    document.getElementById('wishPrice').value = "";
+    save(); render();
+}
+
+function buyItem(id) {
+    const item = state.wishlist.find(w => w.id === id);
+    if(confirm(`Buy ${item.name} using Fund?`)) {
+        state.wishlistFund -= item.price;
+        state.currentCycle.expenses.push({
+            id: Date.now(),
+            amount: 0,
+            category: "Shopping",
+            note: `[Fund Buy] ${item.name}`,
+            date: new Date().toISOString()
+        });
+        state.wishlist = state.wishlist.filter(w => w.id !== id);
+        save(); render();
+    }
+}
+
+function deleteExpense(id) {
+    if(confirm("Delete entry?")) {
+        state.currentCycle.expenses = state.currentCycle.expenses.filter(e => e.id !== id);
+        save(); render();
+    }
+}
+
+function deleteWish(id) {
+    state.wishlist = state.wishlist.filter(w => w.id !== id);
+    save(); render();
+}
+
+/* ==================== LIST RENDERERS ==================== */
+function renderLog() {
+    const el = document.getElementById('log');
+    el.innerHTML = "";
+    const list = state.currentCycle.expenses.slice().reverse();
+    if(list.length === 0) return el.innerHTML = `<div class="text-center text-slate-500 text-xs mt-4">No data.</div>`;
+
+    list.forEach(item => {
+        el.innerHTML += `
+            <div class="flex justify-between items-center p-3 bg-slate-800/40 rounded-lg border border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                <div>
+                    <div class="text-white font-bold">₹${item.amount} <span class="text-[10px] text-slate-400 font-normal ml-1">${item.category}</span></div>
+                    <div class="text-xs text-slate-500">${item.note}</div>
+                </div>
+                <button onclick="deleteExpense(${item.id})" class="text-slate-500 hover:text-rose-500"><i class="ph-bold ph-trash"></i></button>
+            </div>`;
+    });
+}
+
+function renderWishlist(fund) {
+    const grid = document.getElementById('wishlistGrid');
+    grid.innerHTML = "";
+    if(state.wishlist.length === 0) return grid.innerHTML = `<p class="text-slate-500 text-sm col-span-2 text-center">No wishes yet.</p>`;
+
+    state.wishlist.forEach(item => {
+        const canBuy = fund >= item.price;
+        grid.innerHTML += `
+            <div class="glass-panel p-4 rounded-xl relative group">
+                <button onclick="deleteWish(${item.id})" class="absolute top-2 right-2 text-slate-500 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><i class="ph-bold ph-trash"></i></button>
+                <div class="font-bold text-white truncate pr-6">${item.name}</div>
+                <div class="text-purple-400 font-mono text-sm">₹${item.price.toLocaleString()}</div>
+                ${canBuy 
+                    ? `<button onclick="buyItem(${item.id})" class="mt-2 w-full py-2 bg-purple-600 hover:bg-purple-500 rounded text-xs font-bold text-white">Buy Now</button>`
+                    : `<button class="mt-2 w-full py-2 bg-slate-700 text-slate-500 rounded text-xs cursor-not-allowed">Need ₹${(item.price - fund).toLocaleString()}</button>`
+                }
+            </div>`;
+    });
+}
+
+/* ==================== CYCLE MANAGEMENT ==================== */
+function endCycle() {
+    const cycle = state.currentCycle;
+    const spent = cycle.expenses.reduce((a, b) => a + b.amount, 0);
+    const totalTax = cycle.dailyTax * cycle.days;
+    
+    // Calculate final savings (Budget - Fixed - Tax - Spent)
+    // If negative (debt), we treat savings as 0
+    const rawSavings = (cycle.budget - cycle.fixed - totalTax) - spent;
+    const cleanSavings = Math.max(0, rawSavings);
+    
+    // Add savings + the tax we reserved to the fund
+    const rollover = cleanSavings + totalTax;
+    
+    state.wishlistFund += rollover;
+    
+    // Archive
+    state.history.push({
+        startDate: cycle.startDate,
+        endDate: new Date().toISOString(),
+        totalSpent: spent,
+        rollover: rollover,
+        expenses: cycle.expenses
+    });
+    
+    // Reset Logic
+    state.currentCycle.expenses = [];
+    state.currentCycle.startDate = new Date().toISOString();
+    // Budget/Fixed/Tax settings remain the same
+    
+    toggleModal('cycleModal');
+    save();
+    render();
+    alert(`Cycle Closed! ₹${rollover.toLocaleString()} added to Wishlist Fund.`);
+}
+
+/* ==================== IMPORT / EXPORT / BACKUP ==================== */
+function toggleModal(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('hidden');
+}
+
+function exportData(type) {
+    let data = [...state.currentCycle.expenses];
+    // Add history expenses with a tag
+    state.history.forEach(h => {
+        h.expenses.forEach(e => {
+            e.note = e.note + " [Archived]";
+            data.push(e);
+        });
+    });
+
+    if (type === 'range') {
+        const s = new Date(document.getElementById('exportStart').value);
+        const e = new Date(document.getElementById('exportEnd').value);
+        if(isNaN(s) || isNaN(e)) return alert("Select valid dates");
+        data = data.filter(x => {
+            const d = new Date(x.date);
+            return d >= s && d <= e;
+        });
+    }
+
+    if(data.length === 0) return alert("No data found for selection.");
+
+    let csv = "Date,Category,Note,Amount\n";
+    data.forEach(row => {
+        csv += `${new Date(row.date).toLocaleDateString()},${row.category},"${row.note.replace(/"/g, '""')}",${row.amount}\n`;
+    });
+
+    downloadFile(csv, 'budget_export.csv', 'text/csv');
+    toggleModal('exportModal');
+}
+
+function backupData() {
+    const json = JSON.stringify(state, null, 2);
+    downloadFile(json, `smart_budget_backup_${new Date().toISOString().slice(0,10)}.json`, 'application/json');
+}
+
+function restoreData(input) {
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const d = JSON.parse(e.target.result);
+            if(!d.currentCycle || !d.wishlist) throw new Error("Invalid structure");
+            state = d;
+            save();
+            initUI();
+            toggleModal('settingsModal');
+            alert("Restored Successfully!");
+        } catch(err) { alert("Invalid Backup File"); }
+    };
+    reader.readAsText(file);
+}
+
+function downloadFile(content, name, type) {
+    const blob = new Blob([content], {type});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function hardReset() {
+    if(confirm("PERMANENTLY DELETE ALL DATA? This cannot be undone.")) {
+        localStorage.removeItem('budgetAi_v10');
+        location.reload();
+    }
+}
+
+/* ==================== CHARTS ==================== */
+let c1, c2;
+function renderCharts() {
+    const ctx1 = document.getElementById('dailyChart');
+    const ctx2 = document.getElementById('categoryChart');
+    if(!ctx1 || !ctx2) return;
+
+    const ex = state.currentCycle.expenses;
+    const dMap = {}; const cMap = {};
+    
+    // Sort by date
+    [...ex].sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(e => {
+        const d = new Date(e.date).toLocaleDateString();
+        dMap[d] = (dMap[d]||0) + e.amount;
+        cMap[e.category] = (cMap[e.category]||0) + e.amount;
+    });
+
+    if(c1) c1.destroy();
+    if(c2) c2.destroy();
+
+    c1 = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: Object.keys(dMap),
+            datasets: [{
+                label: 'Spent',
+                data: Object.values(dMap),
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                fill: true, tension: 0.4
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { x: {display:false}, y: {grid: {color:'rgba(255,255,255,0.05)'}} } }
+    });
+
+    c2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(cMap),
+            datasets: [{
+                data: Object.values(cMap),
+                backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {position:'right', labels:{color:'#94a3b8', font:{size:10}}} } }
+    });
+}
+
+function switchTab(t) {
+    const d = document.getElementById('dashboardView');
+    const w = document.getElementById('wishlistView');
+    if(t === 'dashboard') {
+        d.classList.remove('hidden'); w.classList.add('hidden');
+        document.getElementById('tabDashboard').classList.replace('text-slate-400','text-white');
+        document.getElementById('tabDashboard').classList.add('bg-indigo-600');
+        document.getElementById('tabWishlist').classList.remove('bg-indigo-600','text-white');
+        document.getElementById('tabWishlist').classList.add('text-slate-400');
+        setTimeout(renderCharts, 50);
+    } else {
+        d.classList.add('hidden'); w.classList.remove('hidden');
+        document.getElementById('tabWishlist').classList.replace('text-slate-400','text-white');
+        document.getElementById('tabWishlist').classList.add('bg-indigo-600');
+        document.getElementById('tabDashboard').classList.remove('bg-indigo-600','text-white');
+        document.getElementById('tabDashboard').classList.add('text-slate-400');
+        render();
+    }
+}
+</script>
+</body>
+</html>
